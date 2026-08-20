@@ -1,6 +1,6 @@
-# Welcome to the complete, step-by-step tutorial on building a custom Large Language Model (LLM) from scratch!
+# Welcome to the complete step-by-step tutorial on building a custom Large Language Model (LLM) from scratch!
 
-In this comprehensive guide, we're going to dive deep into the Colab notebook you are currently exploring. Our journey will cover the construction of an **Encoder-Decoder Transformer** architecture, pre-training on massive corpora like Wikipedia, and fine-tuning on instruction-following datasets.
+In this comprehensive guide we're going to dive deep into the Colab notebook you are currently exploring. Our journey will cover the construction of an **Encoder-Decoder Transformer** architecture, pre-training on massive corpora like Wikipedia and fine-tuning on instruction-following datasets.
 
 Let's dissect the code and understand the *rationale* behind every single design and implementation choice.
 
@@ -26,7 +26,7 @@ tokenizer.pad_token = tokenizer.eos_token
 
 ### Why this step matters: Choosing and Configuring a Tokenizer
 
-We opt for the `GPT-2 tokenizer` due to its widespread adoption and proven effectiveness. It employs a **Byte-Pair Encoding (BPE)** algorithm, which efficiently breaks down words into small, meaningful subunits. This approach balances vocabulary size and model complexity.
+We opt for the `GPT-2 tokenizer` due to its widespread adoption and proven effectiveness. It employs a **Byte-Pair Encoding (BPE)** algorithm which efficiently breaks down words into small, meaningful subunits. This approach balances vocabulary size and model complexity.
 
 A crucial configuration is setting `tokenizer.pad_token = tokenizer.eos_token`. GPT-2's tokenizer doesn't have a default padding token (a special token used to make all sequences in a batch the same length). By assigning it to the end-of-sequence token, we ensure all padding tokens are treated uniformly during training.
 
@@ -34,10 +34,10 @@ A crucial configuration is setting `tokenizer.pad_token = tokenizer.eos_token`. 
 
 ## Phase 2: Building the Brain (The Transformer Architecture)
 
-This section defines our custom Large Language Model, named `LLM`, as a PyTorch `nn.Module`. Unlike solely decoder-only architectures like standard GPT models, our notebook implements an **Encoder-Decoder Transformer**, similar to the original "Attention is All You Need" paper.
+This section defines our custom Large Language Model named `LLM` as a PyTorch `nn.Module`. Unlike solely decoder-only architectures like standard GPT models, our notebook implements an **Encoder-Decoder Transformer** similar to the original "Attention is All You Need" paper.
 
-- **The Encoder**: Processes and understands the input context, such as a YouTube transcript or a user's instruction. It generates a rich, context-aware representation of the input.
-- **The Decoder**: Takes the encoder's representation and generates the response word by word, conditioned on the input context.
+- **The Encoder**: Processes and understands the input context, such as a YouTube transcript or a user's instruction. It generates a rich and context-aware representation of the input.
+- **The Decoder**: Takes the encoder's representation and generates the response word by word conditioned on the input context.
 
 ```python
 class LLM(nn.Module):
@@ -133,7 +133,7 @@ A critical component for text generation within the Decoder is the **causal mask
 
 ## Phase 3: Unsupervised Pre-training (Learning to Speak)
 
-The first major training phase involves **unsupervised pre-training**. The goal here is to teach the model the fundamental structures, grammar, and vast factual knowledge embedded within the English language and world at large.
+The first major training phase involves **unsupervised pre-training**. The goal here is to teach the model the fundamental structures, grammar and vast factual knowledge embedded within the English language and world at large.
 
 A key challenge with such large datasets is memory management. Downloading the entire Wikipedia dataset into RAM would easily crash your Colab session. To circumvent this, the notebook brings in the power of **streaming datasets**.
 
@@ -145,11 +145,11 @@ from torch.utils.data import IterableDataset, DataLoader
 dataset = load_dataset("wikimedia/wikipedia", "20231101.en", streaming=True)
 ```
 
-This `streaming=True` argument allows the dataset to be loaded and processed in smaller chunks on-the-fly, preventing memory overflows.
+This `streaming=True` argument allows the dataset to be loaded and processed in smaller chunks on-the-fly preventing memory overflows.
 
 ### The Pre-training Objective: Learning Context and Continuity
 
-During the pre-training loop, a specific objective is employed: for each input sequence (a piece of a Wikipedia article), you truncate it at approximately the 85% mark. The **Encoder** receives the first 85%, and the **Decoder** is tasked with predicting the remaining 15%. This trains the model to:
+During the pre-training loop, a specific objective is employed: for each input sequence (a piece of a Wikipedia article) you truncate it at approximately the 85% mark. The **Encoder** receives the first 85% and the **Decoder** is tasked with predicting the remaining 15%. This trains the model to:
 
 - How to generate coherent text based on a given context.
 - The underlying grammar and semantic relationships within the language.
@@ -159,7 +159,7 @@ During the pre-training loop, a specific objective is employed: for each input s
 
 To enable the training of this 144 million parameter model efficiently on commonly available free GPUs (like the NVIDIA T4 in Colab), two advanced optimization techniques are used in the training loop:
 
-1. **`torch.amp.autocast` (Automatic Mixed Precision - AMP)**: This feature automatically performs operations in 16-bit floating-point (FP16) where appropriate, while maintaining 32-bit (FP32) precision where numerical stability is critical.
+1. **`torch.amp.autocast` (Automatic Mixed Precision - AMP)**: This feature automatically performs operations in 16-bit floating-point (FP16) where appropriate while maintaining 32-bit (FP32) precision where numerical stability is critical.
 
    Benefits:
    - **Halved Memory Usage**: FP16 tensors consume half the memory of FP32 tensors, allowing larger models or batch sizes.
@@ -176,9 +176,9 @@ To enable the training of this 144 million parameter model efficiently on common
 
 ## Phase 4: Instruction Fine-Tuning (Learning to Serve)
 
-After pre-training, our model has a strong grasp of the English language, but it primarily knows how to complete sentences. To make it a helpful assistant, we need to teach it to follow instructions and provide helpful responses.
+After pre-training, our model has a strong grasp of the English language but it primarily knows how to complete sentences. To make it a helpful assistant, we need to teach it to follow instructions and provide helpful responses.
 
-We use the **Databricks Dolly 15K dataset**, a curated collection of 15,000 instruction-response pairs across various domains. We format this data into a custom `InstructionDataset` class, ensuring it's structured correctly for our Encoder-Decoder model.
+We use the **Databricks Dolly 15K dataset** a curated collection of 15,000 instruction-response pairs across various domains. We format this data into a custom `InstructionDataset` class, ensuring it's structured correctly for our Encoder-Decoder model.
 
 ### The -100 Padding Trick: Optimizing Loss Calculation
 
@@ -197,7 +197,7 @@ During fine-tuning, we also employ a **lower Learning Rate** (e.g., `2e-5`) comp
 
 ## Phase 5: The YouTube Assistant Interface
 
-The culmination of our model's development is its application as a YouTube Assistant, demonstrated by the `LLM_Assistant_Youtube` function. This function integrates our fine-tuned LLM with YouTube transcript retrieval capabilities, enabling real-time question answering about video content.
+The culmination of our model's development is its application as a YouTube Assistant demonstrated by the `LLM_Assistant_Youtube` function. This function integrates our fine-tuned LLM with YouTube transcript retrieval capabilities enabling real-time question answering about video content.
 
 ```python
 # Example usage:
@@ -211,23 +211,23 @@ Behind the scenes, the `LLM_Assistant_Youtube` function performs several key ste
 
 1. **Transcript Retrieval**: It takes a YouTube URL and uses `langchain_community.document_loaders.YoutubeLoader` to fetch the video's transcript and metadata. If no transcript is available, it gracefully handles the error.
 
-2. **Context Chunking (if RAG is enabled, though not explicitly in this snippet)**: In a full RAG (Retrieval Augmented Generation) setup, the transcript would be split into overlapping chunks, embedded into vector space, and the most relevant chunks would be retrieved based on the user's query.
+2. **Context Chunking (if RAG is enabled, though not explicitly in this snippet)**: In a full RAG (Retrieval Augmented Generation) setup, the transcript would be split into overlapping chunks, embedded into vector space and the most relevant chunks would be retrieved based on the user's query.
 
-3. **Prompt Formatting**: It constructs a structured prompt using the user's `query` and the retrieved `context_text` (from the YouTube transcript), following the pattern: `"Instruction: {query}\nContext: {context_text}\nAnswer:"`.
+3. **Prompt Formatting**: It constructs a structured prompt using the user's `query` and the retrieved `context_text` (from the YouTube transcript) following the pattern: `"Instruction: {query}\nContext: {context_text}\nAnswer:"`.
 
 4. **Input Tokenization**: The formatted prompt is tokenized using our `tokenizer` and converted into input IDs and attention masks, truncated to the model's `max_length` of 512 tokens.
 
 5. **Response Generation**: The tokenized input is fed to the `generate_response_text` function. This function uses the `fine_tuned_model` in evaluation mode (`model.eval()`) to generate the response autoregressively, one token at a time.
 
-6. **Output Decoding**: The generated token IDs are then decoded back into a human-readable string, with special tokens removed for a clean output.
+6. **Output Decoding**: The generated token IDs are then decoded back into a human-readable string with special tokens removed for a clean output.
 
 ### Final Thoughts on Improvement and Scaling
 
 As you've observed, while this custom LLM is a powerful demonstration, achieving performance comparable to state-of-the-art models like ChatGPT requires further scaling and refinement. Key areas for enhancement include:
 
-1. **More Data:** Our pre-training on Wikipedia is foundational, but cutting-edge LLMs are trained on **terabytes** of diverse data, including web scrapes (like CommonCrawl), books, code repositories, and multilingual corpora.
+1. **More Data:** Our pre-training on Wikipedia is foundational but cutting-edge LLMs are trained on **terabytes** of diverse data including web scrapes (like CommonCrawl), books, code repositories and multilingual corpora.
 
-2. **Larger Context Windows:** Our model uses a `max_seq_len` of 512 tokens, which is relatively small for processing long documents or conversations. Modern LLMs feature context windows ranging from 4K to 200K+ tokens.
+2. **Larger Context Windows:** Our model uses a `max_seq_len` of 512 tokens which is relatively small for processing long documents or conversations. Modern LLMs feature context windows ranging from 4K to 200K+ tokens.
 
 3. **Increased Scale:** Our model with 144 million parameters is roughly the size of the original GPT-1. Contemporary LLMs range from billions (e.g., Llama 2 7B) to hundreds of billions (e.g., GPT-3 175B) of parameters.
 
